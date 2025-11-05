@@ -195,6 +195,7 @@ double MCC118_readChannel(int address, int channnel)
     int result = RESULT_SUCCESS;
     char buf[DEFAULT_BUFLEN] = {0};
     double voltage = 0.0;
+    double tmpVoltage = 0.0;
     
     result = mcc118_a_in_read(address, channnel, OPTS_DEFAULT, &voltage);
 
@@ -203,6 +204,16 @@ double MCC118_readChannel(int address, int channnel)
         memset(buf, 0, sizeof(buf));
         sprintf(buf, "The MCC118_readChannel failed. CH[%d]=%3.3f V", channnel, voltage);
         writeToLog(INFO, buf);
+    }
+    else{
+        tmpVoltage = round(voltage * 100.0)/ 100.0;
+        if(tmpVoltage == 1.75 || tmpVoltage == 1.74)
+        {
+            voltage = 0.0;
+            memset(buf, 0, sizeof(buf));
+            sprintf(buf, "The MCC118_readChannel disconnected. CH[%d]=%3.3f V", channnel, voltage);
+            writeToLog(INFO, buf);
+        }
     }
 
     return voltage;

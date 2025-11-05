@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <cstring>
+#include <cmath> 
 #include <gpiod.h>
 #include <daqhats/daqhats.h>
 #include <daqhats/mcc118.h>
