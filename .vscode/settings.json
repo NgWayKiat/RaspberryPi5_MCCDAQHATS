@@ -55,6 +55,8 @@
         "version": "cpp",
         "filesystem": "cpp",
         "fstream": "cpp",
-        "iomanip": "cpp"
+        "iomanip": "cpp",
+        "codecvt": "cpp",
+        "map": "cpp"
     }
 }
