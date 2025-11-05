@@ -48,7 +48,7 @@ void serverSok(int& retVal)
     char buffer[DEFAULT_BUFLEN] = {0};
 
     memset(buf, 0, sizeof(buf));
-    sprintf(buf, "Start server socket function. SERVER_PORT [%d]", gsHostPort);
+    sprintf(buf, "Start server socket function. SERVER_PORT [%d]", giHostPort);
     writeToLog(INFO, buf);
 
     // Create socket file descriptor
@@ -69,7 +69,7 @@ void serverSok(int& retVal)
 
     host_address.sin_family = AF_INET;
     host_address.sin_addr.s_addr = INADDR_ANY;
-    host_address.sin_port = htons(gsHostPort);
+    host_address.sin_port = htons(giHostPort);
 
      // Bind the socket to the specified IP and port
     if (bind(server_fd, (struct sockaddr *)&host_address, sizeof(host_address)) < 0) {

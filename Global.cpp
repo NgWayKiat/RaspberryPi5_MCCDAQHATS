@@ -7,8 +7,10 @@ MCC118HatInfo structMCC118HatInfo;
 
 #pragma region InitGlobalVariables
 
-int gsHostPort = 8888;
+int giHostPort = 8888;
+int giLogDays = 7;
 bool gbMCC118ConfigFlag = false;
+int giMSScan = 5000000; // Suspend execution for 100,000 microseconds
 
 #pragma endregion InitGlobalVariables
 
@@ -141,12 +143,27 @@ void initiate_GlobalVariable()
     {
         if(is_int(sTemp))
         {
-            gsHostPort = atoi(sTemp.c_str());
+            giHostPort = atoi(sTemp.c_str());
         }
     }
 
     memset(buf, 0, sizeof(buf));
-    sprintf(buf, "The Global Variable [HOST_PORT] : gsHostPort=%d", gsHostPort);
+    sprintf(buf, "The Global Variable [HOST_PORT] : giHostPort=%d", giHostPort);
+    writeToLog(INFO, buf);
+
+    //Assign Truncate Log Day
+    sTemp = findGlobalVariableMap("LOG_DAY");
+
+    if(sTemp != "")
+    {
+        if(is_int(sTemp))
+        {
+            giLogDays = atoi(sTemp.c_str());
+        }
+    }
+
+    memset(buf, 0, sizeof(buf));
+    sprintf(buf, "The Global Variable [LOG_DAY] : giLogDays=%d", giLogDays);
     writeToLog(INFO, buf);
 
     //Assign MCC118 Config Flag

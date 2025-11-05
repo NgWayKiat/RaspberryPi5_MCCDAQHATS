@@ -11,10 +11,31 @@ using namespace std;
 
 #define DEFAULT_BUFLEN 1024
 
+void Init(int& retVal)
+{
+    char buf[DEFAULT_BUFLEN];
+    int ret = 0;
+
+    while(true)
+    {
+        memset(buf, 0, sizeof(buf));
+        sprintf(buf, "Start the Truncate Function....");
+        writeToLog(INFO, buf);
+        ret = deleteLogFile();
+        if(ret = 0)
+        {
+            memset(buf, 0, sizeof(buf));
+            sprintf(buf, "No Log File need to truncate....");
+            writeToLog(INFO, buf);
+        }
+        sleep(86400); //24hrs 24 * 60 * 60
+    }
+}
+
 int main(void){
     char buf[DEFAULT_BUFLEN];
     int ret = 0;
-    int retMCCThread, restServerThread = 0;
+    int retMCCThread, retServerThread, retTruncThread = 0;
     int iHatCount = hat_list(HAT_ID_ANY, NULL);
 
     memset(buf, 0, sizeof(buf));
@@ -28,6 +49,8 @@ int main(void){
     writeToLog(INFO, buf);
 
     ret = initiate_MappingTables();
+
+    deleteLogFile();
 
     if(ret > 0)
     {
@@ -48,13 +71,23 @@ int main(void){
         sprintf(buf, "Found the MCC DAQ HATS in the system.");
         writeToLog(INFO, buf);
 
+        thread TRUNC_THREAD(Init, ref(retTruncThread));
         thread MCC_THREAD(MCC_DAQHATS_INIT, &iHatCount, ref(retMCCThread));
-        //The thread Wait for 0.5 Second. To let the server thread start first without any issue.
+        //The thread Wait for 0.5 Second. To prevent server thread conflict.
         this_thread::sleep_for(500ms);
-        thread SERVERSOCK_THREAD(serverSok, ref(restServerThread));
+        thread SERVERSOCK_THREAD(serverSok, ref(retServerThread));
 
+        TRUNC_THREAD.join();
         MCC_THREAD.join();
         SERVERSOCK_THREAD.join();
+
+        if (retTruncThread != 0)
+        {
+            memset(buf, 0, sizeof(buf));
+            sprintf(buf, "Init Error: %d", retTruncThread);
+            writeToLog(ERRORS, buf);
+        }
+
 
         if (retMCCThread != 0)
         {
@@ -63,17 +96,20 @@ int main(void){
             writeToLog(ERRORS, buf);
         }
 
-        if (restServerThread != 0)
+        if (retServerThread != 0)
         {
             memset(buf, 0, sizeof(buf));
-            sprintf(buf, "Server Socket Error: %d", restServerThread);
+            sprintf(buf, "Server Socket Error: %d", retServerThread);
             writeToLog(ERRORS, buf);
-        }
+        }      
     }
     else
     {
         memset(buf, 0, sizeof(buf));
         sprintf(buf, "No Found Any HAT Device List");
+        writeToLog(ERRORS, buf);
+        memset(buf, 0, sizeof(buf));
+        sprintf(buf, "Please Intall the MCC118 DAQHATS board in the RaspPi5. Reboot the device and try again.");
         writeToLog(ERRORS, buf);
     }
 

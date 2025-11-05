@@ -172,8 +172,8 @@ void MCC118(int address, int& retVal)
             sprintf(buf, sMsg.c_str());
             writeToLog(INFO, buf);
             fflush(stdout);
-            // Suspend execution for 100,000 microseconds (0.5 seconds)
-            usleep(500000);
+            
+            usleep(giMSScan);
         }
     }
     else

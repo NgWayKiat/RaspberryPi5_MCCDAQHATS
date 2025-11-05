@@ -1,5 +1,8 @@
 #include "Logger.h"
 
+using namespace std;
+namespace fs = filesystem;
+
 const int FileSizeLimit = FILE_SIZE;
 
 string currentDirectory = "";
@@ -11,14 +14,14 @@ void checkLogDirectory()
 		currentDirectory = "/BIO/Program/" + sProgramName;
 		logDir = currentDirectory + "/log";
 	#else
-		currentDirectory = filesystem::current_path().generic_string();
+		currentDirectory = fs::current_path().generic_string();
 		logDir = currentDirectory + "/log";
 	#endif
 	char buf[DEFAULT_BUFLEN] = {0};
 
-	if (!filesystem::exists(logDir))
+	if (!fs::exists(logDir))
 	{
-		filesystem::create_directory(logDir);
+		fs::create_directory(logDir);
 
 		memset(buf, 0, sizeof(buf));
 		sprintf(buf, "sudo chmod 777 %s",logDir.c_str());
@@ -26,10 +29,56 @@ void checkLogDirectory()
 	}
 }
 
+int deleteLogFile()
+{
+	int ret = 0;
+	ofstream file;
+	time_t now = time(0);
+	char buf[DEFAULT_BUFLEN] = {0};
+	char tmBuf[DEFAULT_BUFLEN] = {0};
+	checkLogDirectory();
+	struct tm curTmStruct = *localtime(&now);
+	time_t curTime = mktime(&curTmStruct);
+
+	for (const auto& entry : fs::recursive_directory_iterator(logDir)) {
+		struct stat t_stat;
+		struct tm * timeinfo;
+		string filepath = "";
+		time_t tmpTime;
+
+		filepath = entry.path().string();		
+		stat(filepath.c_str(), &t_stat);
+		timeinfo = localtime(&t_stat.st_ctime);
+		tmpTime = mktime(timeinfo);
+		memset(tmBuf, 0, sizeof(tmBuf));
+		strftime(tmBuf, sizeof(tmBuf), "%Y-%m-%d %H:%M:%S", timeinfo);
+        string formatted_time(tmBuf);
+
+		double difference = difftime(curTime, tmpTime); //the different time in seconds
+		double min = difference / 60;
+		double hrs = min / 60;
+		int days = hrs / 24;
+
+		if(days > giLogDays)
+		{
+			if(remove(filepath.c_str())==0)
+			{
+				ret = 1;
+				memset(buf, 0, sizeof(buf));
+				sprintf(buf, "Truncate Log File Name[%s] CreationDate[%s] is successfully.", entry.path().filename().string().c_str(), formatted_time.c_str());
+				writeToLog(INFO, buf);
+			}
+		}
+	}
+
+	return ret;
+}
+
 void writeToLog(LogLevel level, char* message)
 {
 	ofstream file;
 	char buf[DEFAULT_BUFLEN] = {0};
+	string sType = "INFO";
 	checkLogDirectory();
 
 	string avaFileName = getAvailableFileName();
@@ -37,7 +86,26 @@ void writeToLog(LogLevel level, char* message)
 	string dateTime = currentDateTimeInString();
 	
 	memset(buf, 0, sizeof(buf));
-	sprintf(buf, "%s %s", dateTime.c_str(), message);
+
+	switch (level)
+	{
+	case ERRORS:
+		sType = "ERROR";
+		break;
+	case DEBUG:
+		sType = "ERROR";
+		break;
+	case WARNING:
+		sType = "WARNING";
+		break;
+	case CRITICAL:
+		sType = "CRITICAL";
+		break;
+	default:
+		break;
+	}
+	
+	sprintf(buf, "%s [%s] %s", dateTime.c_str(), sType.c_str(), message);
 
 	//ios::out is set to write mode
 	//ios::app is append the data in end of line of the file
@@ -69,9 +137,9 @@ string getAvailableFileName()
 	string defLogFilePath = logDir + "/" + defFileNameWithRN + ".txt";
 	string avaFileName;
 
-	if (filesystem::exists(defLogFilePath))
+	if (fs::exists(defLogFilePath))
 	{
-		fileSizeB = static_cast<long>(filesystem::file_size(defLogFilePath));
+		fileSizeB = static_cast<long>(fs::file_size(defLogFilePath));
 		fileSizeKb = static_cast<double>(fileSizeB) / 1024.0;
 
 		if (fileSizeKb > FileSizeLimit)
@@ -85,9 +153,9 @@ string getAvailableFileName()
 				tempFileName = defFileName + "_" + fileNameRN;
 				tempLogFilePath = logDir + "/" + tempFileName + ".txt";
 
-				if (filesystem::exists(tempLogFilePath))
+				if (fs::exists(tempLogFilePath))
 				{
-					fileSizeB = static_cast<long>(filesystem::file_size(tempLogFilePath));
+					fileSizeB = static_cast<long>(fs::file_size(tempLogFilePath));
 					fileSizeKb = static_cast<double>(fileSizeB) / 1024.0;
 
 					if (fileSizeKb < FileSizeLimit)

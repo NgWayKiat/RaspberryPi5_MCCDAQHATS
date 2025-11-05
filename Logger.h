@@ -8,9 +8,13 @@
 #include <fstream>
 #include <sstream>
 #include <iomanip>
+#include <sys/stat.h>
+#include <time.h>
+#include <cstdio>
 #include "Global.h"
 #include "Misc.h"
 #include "Versions.h"
+
 
 using namespace std;
 
@@ -20,6 +24,7 @@ using namespace std;
 enum LogLevel { DEBUG, INFO, WARNING, ERRORS, CRITICAL };
 
 void checkLogDirectory();
+int deleteLogFile();
 void writeToLog(LogLevel level, char* message);
 string getAvailableFileName();
 
