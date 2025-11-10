@@ -1,2 +1,6 @@
-# RaspberryPi5_MCCDAQHATS
-This is MCC118 with raspberry pi to monitor voltage from the channel
+# RaspberryPi Voltage Monitor System
+Hardware List:
+1. Raspberry Pi5
+2. Raspberry Pi5 HATS (MCC118)
+
+Development IDE: VSCODE
