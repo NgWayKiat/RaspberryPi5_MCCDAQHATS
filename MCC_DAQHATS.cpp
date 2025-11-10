@@ -47,10 +47,12 @@ void MCC_DAQHATS_INIT(int* count, int& retVal)
 
 #pragma region "MCC118"
 
-void MCC118_Init_Struct()
+void MCC118_Init_Struct(int address)
 {
     char buf[DEFAULT_BUFLEN] = {0};
     char temp[DEFAULT_BUFLEN] = {0};
+    double oriSlope = 0.0;
+    double oriOffset = 0.0;
 
     memset(buf, 0, sizeof(buf));
     sprintf(buf, "The initiate value for the MCC118 Structur List as below:");
@@ -58,6 +60,7 @@ void MCC118_Init_Struct()
 
     for (int i=0; i < structMCC118HatInfo.iTotalChannel; i++)
     {
+        mcc118_calibration_coefficient_read(address, i, &oriSlope, &oriOffset);
         structMCC118HatInfo.subInfo[i].iChannel = i;
         memset(temp, 0, sizeof(temp));
         sprintf(temp, "Channel %d" , i);
@@ -66,11 +69,16 @@ void MCC118_Init_Struct()
         sprintf(temp, "MCC118 DAQ HAT - Channel %d" , i);
         structMCC118HatInfo.subInfo[i].sDescription = temp;
         structMCC118HatInfo.subInfo[i].bStatus = true;
-        structMCC118HatInfo.subInfo[i].value = 0.0;
+        structMCC118HatInfo.subInfo[i].value = 0.00;
+        structMCC118HatInfo.subInfo[i].oriSlope = oriSlope;
+        structMCC118HatInfo.subInfo[i].oriOffset = oriOffset;
+        structMCC118HatInfo.subInfo[i].newSlope = oriSlope;
+        structMCC118HatInfo.subInfo[i].newOffset = oriOffset;
 
         memset(buf, 0, sizeof(buf));
-        sprintf(buf, "CHN[%d], Name:%s, Description:%s, Status:%s, Value:%d", structMCC118HatInfo.subInfo[i].iChannel,  structMCC118HatInfo.subInfo[i].sName.c_str(),
-        structMCC118HatInfo.subInfo[i].sDescription.c_str(), structMCC118HatInfo.subInfo[i].bStatus ? "Enable":"Disable", structMCC118HatInfo.subInfo[i].value);
+        sprintf(buf, "CHN[%d], Name:%s, Description:%s, Status:%s, Value:%2f, OriSlope:%2f, OriOffset:%2f", structMCC118HatInfo.subInfo[i].iChannel,  structMCC118HatInfo.subInfo[i].sName.c_str(),
+        structMCC118HatInfo.subInfo[i].sDescription.c_str(), structMCC118HatInfo.subInfo[i].bStatus ? "Enable":"Disable", structMCC118HatInfo.subInfo[i].value,
+        structMCC118HatInfo.subInfo[i].oriSlope, structMCC118HatInfo.subInfo[i].oriOffset);
         writeToLog(INFO, buf);
     }
 }
@@ -152,8 +160,8 @@ void MCC118(int address, int& retVal)
         sprintf(buf, "MAX Range = %d", structMCC118HatInfo.maxRange);  
         writeToLog(INFO, buf);
 
-        MCC118_Init_Struct();
-        
+        MCC118_Init_Struct(address);
+
         while (true){
             memset(buf, 0, sizeof(buf));
             string sMsg = "Voltage Result: ";
@@ -206,6 +214,7 @@ double MCC118_readChannel(int address, int channnel)
         writeToLog(INFO, buf);
     }
     else{
+        /*
         tmpVoltage = round(voltage * 100.0)/ 100.0;
         if(tmpVoltage == 1.75 || tmpVoltage == 1.74)
         {
@@ -214,6 +223,7 @@ double MCC118_readChannel(int address, int channnel)
             sprintf(buf, "The MCC118_readChannel disconnected. CH[%d]=%3.3f V", channnel, voltage);
             writeToLog(INFO, buf);
         }
+        */
     }
 
     return voltage;

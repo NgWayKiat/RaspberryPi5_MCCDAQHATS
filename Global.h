@@ -43,7 +43,7 @@ struct ClientServer {
     string name;
     string ip;
     int port;
-    int status;  // 0:DISCONNECTED 1:CONNECTED
+    int status;  // 0:DISCONNECTED 1:CONNECTED 2:ERROR
     int sok;  // Keep socket value
 };
 
@@ -72,6 +72,10 @@ struct MCC118HatInfoSub{
     string sName;
     string sDescription;
     double value;
+    double oriSlope;
+    double oriOffset;
+    double newSlope;
+    double newOffset;
     bool bStatus;
 };
 

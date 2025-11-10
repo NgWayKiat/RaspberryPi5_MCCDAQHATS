@@ -22,7 +22,7 @@ void Init(int& retVal)
         sprintf(buf, "Start the Truncate Function....");
         writeToLog(INFO, buf);
         ret = deleteLogFile();
-        if(ret = 0)
+        if(ret == 0)
         {
             memset(buf, 0, sizeof(buf));
             sprintf(buf, "No Log File need to truncate....");

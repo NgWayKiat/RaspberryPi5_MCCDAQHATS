@@ -20,7 +20,7 @@ void MCC_DAQHATS_INIT(int* count, int& retVal);
 
 #pragma region MCC118
 
-void MCC118_Init_Struct();
+void MCC118_Init_Struct(int address);
 
 void MCC118(int address, int& retVal);
 

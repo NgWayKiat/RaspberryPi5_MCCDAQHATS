@@ -78,6 +78,7 @@ void writeToLog(LogLevel level, char* message)
 {
 	ofstream file;
 	char buf[DEFAULT_BUFLEN] = {0};
+	bool isOpen = false;
 	string sType = "INFO";
 	checkLogDirectory();
 
