@@ -125,6 +125,7 @@ void handle_client_event(int* client_sock, string recData)
     string secondToken = "";
     vector<string> vTemp;
     vector<string> vTempL2;
+    bool isCorrectCMD = false;
 
     memset(buf, 0, sizeof(buf));
     sprintf(buf, "%s", recData.c_str());
@@ -135,17 +136,20 @@ void handle_client_event(int* client_sock, string recData)
     switch (iCode)
     {
     case A0001:
+        isCorrectCMD = true;
         memset(sendData, 0, sizeof(sendData));
         sprintf(sendData, "R0001|:|The Raspi5 is rebooting.");
         system("sudo reboot");
         break;
     
     case A0002:
+        isCorrectCMD = true;
         memset(sendData, 0, sizeof(sendData));
         sprintf(sendData, "R0002|:|NAME=%s;VERSION=%s;MODIFY_DATE=%s", sProgramName.c_str(), sVersion.c_str(), sModifyDate.c_str());
         break;
 
     case A0003:
+        isCorrectCMD = true;
         vol = MCC118_readChannel(structMCC118HatInfo.address, giReadChannel);
         memset(sendData, 0, sizeof(sendData));
         sprintf(sendData, "R0003|:|The Read & Send Channel [%d] -> Voltage[%3.3f]", giReadChannel, vol);
@@ -165,17 +169,31 @@ void handle_client_event(int* client_sock, string recData)
                     if (sTempL2 == "CHN")
                     {
                         //set the read/send channel based on the result
-                        giReadChannel = atoi(vTempL2[1].c_str());
+                        secondToken = vTempL2[1];
+                        if(is_int(secondToken))
+                        {
+                            isCorrectCMD = true;
+                            giReadChannel = atoi(secondToken.c_str());
+                        }
                         break;
                     }
                 }
             }
         }
-        memset(sendData, 0, sizeof(sendData));
-        sprintf(sendData, "R0005|:|Set the Read & Send Channel to [%d]", giReadChannel);
+        if(isCorrectCMD)
+        {
+            memset(sendData, 0, sizeof(sendData));
+            sprintf(sendData, "R0005|:|Set the Read & Send Channel to [%d]", giReadChannel);
+        }
+        else
+        {
+            memset(sendData, 0, sizeof(sendData));
+            sprintf(sendData, "R0005|:|Incorrect Command Received. The command should be [A0005|:|CHN=2]. The CHN must equal like 0~7.", giReadChannel);
+        }
         break;
     
     case A8888:
+        isCorrectCMD = true;
         for(int i =0; i < structMCC118HatInfo.iTotalChannel; i++)
         {
             vol = MCC118_readChannel(structMCC118HatInfo.address, i);
@@ -188,6 +206,7 @@ void handle_client_event(int* client_sock, string recData)
         break;
     
     case A9999:
+        isCorrectCMD = true;
         vol = MCC118_readChannel(structMCC118HatInfo.address, giReadChannel);
         memset(sendData, 0, sizeof(sendData));
         sprintf(sendData, "valid=1;value=%3.3f;", vol);
