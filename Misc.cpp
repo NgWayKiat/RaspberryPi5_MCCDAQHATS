@@ -30,6 +30,7 @@ bool is_int(const string& s)
     return( strspn( s.c_str(), "-.0123456789" ) == s.size() );
 }
 
+//The split function for the delimiter with single character
 vector<string> splitString(const string& s, char delimiter) {
     vector<string> tokens;
     string token;
@@ -41,6 +42,7 @@ vector<string> splitString(const string& s, char delimiter) {
     return tokens;
 }
 
+//The split function for the delimiter with multiple/string character
 vector<string> splitStringByDelimiter(const string& s, const string& delimiter) {
     vector<string> tokens;
     size_t start = 0;

@@ -148,18 +148,23 @@ void handle_client_event(int* client_sock, string recData)
     case A0003:
         vol = MCC118_readChannel(structMCC118HatInfo.address, giReadChannel);
         memset(sendData, 0, sizeof(sendData));
-        sprintf(sendData, "The Read & Send Channel [%d] -> Voltage[%3.3f]", giReadChannel, vol);
+        sprintf(sendData, "R0003|:|The Read & Send Channel [%d] -> Voltage[%3.3f]", giReadChannel, vol);
         break;
     
-    case A0005:         
+    case A0005:
+        //Split to get the following data with string delimeter         
         vTemp = splitStringByDelimiter(recData, delimeter);
         for (const string& sTemp : vTemp) {
+            //split to get the specific data with single char delimeter
             vTempL2 = splitString(sTemp, '=');
+            //Only check the size at least 2. exmpl: CHN=2
             if(vTempL2.size() > 1)
             {
-                for (const string& sTempL2 : vTempL2) {                    
+                for (const string& sTempL2 : vTempL2) {      
+                    //Filter the data with specific word "CHN" to get the result              
                     if (sTempL2 == "CHN")
                     {
+                        //set the read/send channel based on the result
                         giReadChannel = atoi(vTempL2[1].c_str());
                         break;
                     }
@@ -167,7 +172,7 @@ void handle_client_event(int* client_sock, string recData)
             }
         }
         memset(sendData, 0, sizeof(sendData));
-        sprintf(sendData, "Set the Read & Send Channel to [%d]", giReadChannel);
+        sprintf(sendData, "R0005|:|Set the Read & Send Channel to [%d]", giReadChannel);
         break;
     
     case A8888:
@@ -179,7 +184,7 @@ void handle_client_event(int* client_sock, string recData)
             sTemp += buf;
         }
         memset(sendData, 0, sizeof(sendData));
-        sprintf(sendData, "%s", sTemp.c_str());
+        sprintf(sendData, "R8888|:|%s", sTemp.c_str());
         break;
     
     case A9999:
