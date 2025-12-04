@@ -30,6 +30,7 @@ string findGlobalVariableMap(string key);
 
 #pragma region GlobalVariables
 
+extern int giReadChannel;
 extern int giHostPort;
 extern int giLogDays;
 extern bool gbMCC118ConfigFlag;

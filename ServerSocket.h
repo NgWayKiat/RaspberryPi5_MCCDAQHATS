@@ -23,9 +23,14 @@ enum SRVSOK_CODE
     NOCODE, //No Specific Code
     A0001,  //Reboot Raspi5 [R0001]
     A0002,  //Check is Alive with return ProgramName,Version,ModifyDate [R0002]
-    A0003,
-    A0004,
+    A0003,  //Get the send and read channel
+    A0004,  //Set the send and read channel
     A0005,
+    A0006,
+    A0007,
+    A0008,
+    A0009,
+    A0010,
     A8888,
     A9999
 };

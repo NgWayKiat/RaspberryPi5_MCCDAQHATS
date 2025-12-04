@@ -11,6 +11,7 @@ int giHostPort = 8888;
 int giLogDays = 7;
 bool gbMCC118ConfigFlag = false;
 int giMSScan = 5000000; // Suspend execution for 100,000 microseconds
+int giReadChannel = 0;
 
 #pragma endregion InitGlobalVariables
 

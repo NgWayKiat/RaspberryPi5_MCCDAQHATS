@@ -121,12 +121,15 @@ void handle_client_event(int* client_sock, string recData)
     int iDelToken = 0;
     string delimeter = "|:|";
     string sTemp = "";
+    string firstToken = "";
+    string secondToken = "";
+    vector<string> vTemp;
+    vector<string> vTempL2;
 
     memset(buf, 0, sizeof(buf));
     sprintf(buf, "%s", recData.c_str());
 
-    string firstToken = recData.substr(0, recData.find(delimeter));
-
+    firstToken = recData.substr(0, recData.find(delimeter));
     const int iCode = getSRVSOK_CODE(firstToken);
 
     switch (iCode)
@@ -140,6 +143,31 @@ void handle_client_event(int* client_sock, string recData)
     case A0002:
         memset(sendData, 0, sizeof(sendData));
         sprintf(sendData, "R0002|:|NAME=%s;VERSION=%s;MODIFY_DATE=%s", sProgramName.c_str(), sVersion.c_str(), sModifyDate.c_str());
+        break;
+
+    case A0003:
+        vol = MCC118_readChannel(structMCC118HatInfo.address, giReadChannel);
+        memset(sendData, 0, sizeof(sendData));
+        sprintf(sendData, "The Read & Send Channel [%d] -> Voltage[%3.3f]", giReadChannel, vol);
+        break;
+    
+    case A0005:         
+        vTemp = splitStringByDelimiter(recData, delimeter);
+        for (const string& sTemp : vTemp) {
+            vTempL2 = splitString(sTemp, '=');
+            if(vTempL2.size() > 1)
+            {
+                for (const string& sTempL2 : vTempL2) {                    
+                    if (sTempL2 == "CHN")
+                    {
+                        giReadChannel = atoi(vTempL2[1].c_str());
+                        break;
+                    }
+                }
+            }
+        }
+        memset(sendData, 0, sizeof(sendData));
+        sprintf(sendData, "Set the Read & Send Channel to [%d]", giReadChannel);
         break;
     
     case A8888:
@@ -155,21 +183,13 @@ void handle_client_event(int* client_sock, string recData)
         break;
     
     case A9999:
-        vol = MCC118_readChannel(structMCC118HatInfo.address, 0);
-        memset(buf, 0, sizeof(buf));
-        sprintf(buf, "The Address[%d] -> Channel[%d] -> Voltage[%3.3f]", 0, 0, vol);
-        writeToLog(INFO, buf);
-
+        vol = MCC118_readChannel(structMCC118HatInfo.address, giReadChannel);
         memset(sendData, 0, sizeof(sendData));
         sprintf(sendData, "valid=1;value=%3.3f;", vol);
         break;
 
     default:
-        vol = MCC118_readChannel(structMCC118HatInfo.address, 0);
-        memset(buf, 0, sizeof(buf));
-        sprintf(buf, "The Address[%d] -> Channel[%d] -> Voltage[%3.3f]", 0, 0, vol);
-        writeToLog(INFO, buf);
-
+        vol = MCC118_readChannel(structMCC118HatInfo.address, giReadChannel);
         memset(sendData, 0, sizeof(sendData));
         sprintf(sendData, "valid=1;value=%3.3f;", vol);
         break;
@@ -204,6 +224,26 @@ int getSRVSOK_CODE(string sCode)
     else if(sCode == "A0005")
     {
         ret = A0005;
+    }
+    else if(sCode == "A0006")
+    {
+        ret = A0006;
+    }
+    else if(sCode == "A0007")
+    {
+        ret = A0007;
+    }
+    else if(sCode == "A0008")
+    {
+        ret = A0008;
+    }
+    else if(sCode == "A0009")
+    {
+        ret = A0009;
+    }
+    else if(sCode == "A0010")
+    {
+        ret = A0010;
     }
     else if(sCode == "A8888")
     {
